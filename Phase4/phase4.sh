@@ -22,7 +22,7 @@ EOF
 # 0. Reminders/Prep
 printf "\n\nPre-Flight checklist:\n"
 printf "[] Did you start you TCP reverse shell listener (e.g. netcat)?\n"
-printf "[] Did you update IP/Port in ReverseShell.java to match the reverse shell listener?\n"
+printf "[] Did you update IP/Port in $reverse_shell.java to match the reverse shell listener?\n"
 printf "[] Did you verify all variables at the top of $(basename "$0") script are properly set?\n"
 printf "\n\n"
 
