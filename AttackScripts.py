@@ -407,7 +407,7 @@ def phaseSix():
 			subprocess.run(command, shell=True, text=True)
 		except Exception as e:
 			pass
-	
+	log_event(f"Attack Chain Complete. GG EZ.")
 
 def main():
 	log_event("Script initiated")
@@ -419,7 +419,7 @@ def main():
 	#phaseThree()
 	#phaseFour()
 	#phaseFive()
-	
+	#phaseSix()
 	'''
 			Red Team IP Space	
 	======================================
